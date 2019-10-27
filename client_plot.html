@@ -1,0 +1,50 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.34.0/smoothie.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	</head>
+	<body>
+
+		<h1>Sensor data</h1>
+		<canvas id="plot" width="800" height="350"></canvas>
+
+		<script>
+
+		//////////////////////////////////////////////////////////////////////
+		// set up sockets
+		
+		var socket = io.connect('http://' + '0.0.0.0' + ':' + '5000', {
+			reconnection: true
+		}).on('connect', function(data) {
+			socket.emit('init', {'data': 'r'})
+		}).on('data', function(data) {
+			t = parseFloat(data.t) * 1000;
+			x = parseFloat(data.x);
+			y = parseFloat(data.y);
+			z = parseFloat(data.z);
+			console.log(t + ', ' + x + ', ' + y + ', ' + z);
+			plot_x.append(t, x);
+			plot_y.append(t, y);
+			plot_z.append(t, z);
+		});
+
+		//////////////////////////////////////////////////////////////////////
+		// set up plot
+
+		var plot = new SmoothieChart({
+			interpolation: 'linear',
+			millisPerPixel: 5
+		});
+		plot.streamTo(document.getElementById("plot"));
+		var plot_x = new TimeSeries();
+		var plot_y = new TimeSeries();
+		var plot_z = new TimeSeries();
+		plot.addTimeSeries(plot_x, {lineWidth: 4, strokeStyle:'#00ff00'});
+		plot.addTimeSeries(plot_y, {lineWidth: 4, strokeStyle:'#ff00ff'});
+		plot.addTimeSeries(plot_z, {lineWidth: 4, strokeStyle:'#00ffff'});
+
+		</script>
+	</body>
+</html>

@@ -7,7 +7,9 @@ import time
 # set up environment
 
 sio = socketio.Server(always_connect=True, cors_allowed_origins='*')
-app = socketio.WSGIApp(sio)
+app = socketio.WSGIApp(sio, static_files={
+	'/plot': 'client_plot.html'
+})
 
 # read_from/write_to maintains 'sid' => ['channel1', 'channel2', ...]
 # client_read_from = {} # use socket.io's room behavior to handle this
