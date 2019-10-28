@@ -1,0 +1,46 @@
+<!doctype html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	</head>
+
+	<body>
+		<h1>Debug</h1>
+		<span id="debug"></span>
+		
+		<h1>Orientation</h1>
+		<span id="orientation_values"></span>
+
+		<script type="text/javascript">
+
+		//////////////////////////////////////////////////////////////////////
+		// set up sensors
+		
+		function initSensors() {
+			let orientation = new AbsoluteOrientationSensor({frequency: 30});
+
+			orientation.addEventListener('reading', e => {
+				socket.emit('data', {'t': new Date().getTime(), 'x': orientation.quaternion[0], 'y': orientation.quaternion[1], 'z': orientation.quaternion[2]}); // TODO use sensor time (only reports uptime)
+				document.getElementById('orientation_values').innerHTML = orientation.quaternion[0] + ', ' + orientation.quaternion[1] + ', ' + orientation.quaternion[2];
+			});
+			orientation.start();
+
+			document.getElementById('debug').innerHTML = 'running!';
+		}
+		
+		initSensors();
+
+		//////////////////////////////////////////////////////////////////////
+		// set up sockets
+		
+		var socket = io.connect('{{ URL }}:{{ PORT }}');
+		socket.on('connect', function () {
+			socket.emit('init', {'data': 'w'});
+
+			socket.on('data', function (msg) {
+				console.log(msg);
+			});
+		});
+		</script>
+	</body>
+</html>

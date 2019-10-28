@@ -20,7 +20,7 @@
 		}).on('connect', function(data) {
 			socket.emit('init', {'data': 'r'})
 		}).on('data', function(data) {
-			t = parseFloat(data.t) * 1000;
+			t = parseFloat(data.t);
 			x = parseFloat(data.x);
 			y = parseFloat(data.y);
 			z = parseFloat(data.z);
