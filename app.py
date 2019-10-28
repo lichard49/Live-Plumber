@@ -6,6 +6,7 @@ from pyngrok import ngrok
 # set up environment
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 sio = SocketIO(app, always_connect=True, cors_allowed_origins='*')
 
 # read_from/write_to maintains 'sid' => ['channel1', 'channel2', ...]
