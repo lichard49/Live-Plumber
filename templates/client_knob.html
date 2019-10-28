@@ -1,0 +1,118 @@
+<!doctype html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+		<script src="http://anthonyterrien.com/demo/knob/jquery.knob.min.js"></script>
+
+		<style>
+		body {
+			background-color: #222222;
+		}
+
+		#volume-knob-container > div {
+			display: block !important;
+			margin-top: 10em;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		</style>
+	</head>
+	<body>
+		<div id="volume-knob-container">
+			<input id="volume-knob" class="knob" data-width="700" data-height="700" data-readOnly="true" data-displayprevious="true" data-fgcolor="#ffec03" data-skin="tron" data-thickness=".2" value="75">
+		</div>
+
+		<script>
+
+		//////////////////////////////////////////////////////////////////////
+		// set up sockets
+		
+		var socket = io.connect('0.0.0.0:5000', {
+			reconnection: true
+		}).on('connect', function(data) {
+			socket.emit('init', {'action': 'r'})
+		}).on('data', function(data) {
+			console.log(data.action);
+			if (data.action == 'enable' || data.action == 'disable') {
+				enableKnob($('#volume-knob'), data.action == 'enable');
+			} else if (data.action == 'left' || data.action == 'right') {
+				turnKnob($('#volume-knob'), data.action);
+			}
+		});
+
+		//////////////////////////////////////////////////////////////////////
+		// set up knob
+
+		function enableKnob(knob, enable) {
+			knob[0].isEnabled = enable;
+			if (enable) {
+				var new_color = '#ffec03';
+			} else {
+				var new_color = '#333333';
+			}
+
+			knob.trigger(
+				'configure', {
+					'fgColor': new_color,
+					'bgColor': new_color,
+					'inputColor': new_color,
+				}
+			);
+		};
+
+		function turnKnob(knob, direction) {
+			if (knob[0].isEnabled) {
+				var knobVal = Number(knob[0].value);
+				if (direction == 'left') {
+					knobVal = Math.max(0, knobVal - 1);
+				} else if (direction == 'right') {
+					knobVal = Math.min(100, knobVal + 1);
+				}
+				knob.val(knobVal).trigger('change');
+			}
+		}
+
+		$(function() {
+			$('.knob').knob({
+				draw: function () {
+					// "tron" case
+					if(this.$.data('skin') == 'tron') {
+
+						this.cursorExt = 0.3;
+
+						var a = this.arc(this.cv)  // Arc
+						, pa                   // Previous arc
+						, r = 1;
+
+						this.g.lineWidth = this.lineWidth;
+
+						if (this.o.displayPrevious) {
+							pa = this.arc(this.v);
+							this.g.beginPath();
+							this.g.strokeStyle = this.pColor;
+							this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, pa.s, pa.e, pa.d);
+							this.g.stroke();
+						}
+
+						this.g.beginPath();
+						this.g.strokeStyle = r ? this.o.fgColor : this.fgColor ;
+						this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, a.s, a.e, a.d);
+						this.g.stroke();
+
+						this.g.lineWidth = 2;
+						this.g.beginPath();
+						this.g.strokeStyle = this.o.fgColor;
+						this.g.arc( this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+						this.g.stroke();
+
+						return false;
+					}
+				}
+			});
+
+			enableKnob($('#volume-knob'), false)
+		});
+		</script>
+	</body>
+</html>

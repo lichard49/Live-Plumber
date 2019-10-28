@@ -24,6 +24,10 @@ def sensor_page():
 def plot_page():
 	return render_template('client_plot.html', url=PUBLIC_URL, port=PORT)
 
+@app.route('/knob')
+def knob_page():
+	return render_template('client_knob.html', url=PUBLIC_URL, port=PORT)
+
 ##########################################################################################
 # lifecycle functions
 
